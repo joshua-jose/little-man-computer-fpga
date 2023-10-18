@@ -11,13 +11,14 @@ module main(
    reg [7:0] ar; // address register
    reg [11:0] ac; // accumulator
 
-   reg  [7:0] addr_bus;
-   wire  [11:0] data_bus;
+   reg  [7:0] addr_bus; // address buss
+   reg [11:0] data_write_bus; // write to memory
+   wire [11:0] data_read_bus; // read from memory
 
    reg we; // ram write enable
    reg re; // ram read enable
 
-   ram ram1(clk, addr_bus, data_bus, we, re);
+   ram ram1(clk, addr_bus, data_read_bus, data_write_bus, we, re);
     
    wire [3:0] num;
    wire en_edge;
@@ -54,8 +55,8 @@ module main(
 
            if (state == 1) begin
 
-               ir <= data_bus[11:8]; // load IR
-               ar <= data_bus[7:0]; // load AR
+               ir <= data_read_bus[11:8]; // load IR
+               ar <= data_read_bus[7:0]; // load AR
                 
                re <= 0;
 
@@ -75,11 +76,35 @@ module main(
 
            if (state == 2) begin
                 case (ir)
-                    // 4'd0: running <= 0; // HLT
+                    4'd0: running <= 0; // HLT
+                    4'd3: begin // STA
+                       addr_bus <= ar; // Write to address in address register
+                       data_write_bus <= ac; // Put accumulator on data bus
+                       
+                       we <= 1;
+                       re <= 0; 
+                    end
+                    4'd5: begin // LDA
+                       addr_bus <= ar; // Read from address in address register
+                       we <= 0;
+                       re <= 1; 
+                    end
                 endcase
            end
 
-            state <= (state >= 2) ? 0 : state + 1;
+           if (state == 3) begin
+                case (ir)
+                    4'd3: begin // STA
+                        we <= 0; // disable writes
+                    end
+                    4'd5: begin // LDA
+                       ac <= data_read_bus; // Store read address into accumulator
+                       re <= 0; 
+                    end
+                endcase
+           end
+
+            state <= (state >= 3) ? 0 : state + 1;
         
       end 
     end

@@ -8,7 +8,8 @@ module ram
     (
     input clk, 
     input [7:0] addr_bus, 
-    inout [11:0] data_bus,
+    output [11:0] data_read_bus,
+    input [11:0] data_write_bus,
     input we, re
     
     );
@@ -18,7 +19,7 @@ module ram
 
     initial begin
         $readmemh("ram_init.mem", data); // load RAM initial state
-        
+
     end
 
     // 4 MSBs multplied by 10, 4 LSBs then added to that value
@@ -31,11 +32,12 @@ module ram
         end
         
         if (we & !re) begin
-            data[addr] <= data_bus;
+            data[addr] <= data_write_bus;
         end
     end
 
     // If read enable goes low then output becomes high impedance
-    assign data_bus = re ? cache : 'bz;
+    // assign data_read_bus = re ? cache : 'bz;
+    assign data_read_bus = cache;
 
 endmodule
