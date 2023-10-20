@@ -23,8 +23,14 @@ module main(
    wire [3:0] num;
    wire en_edge;
 
+   reg [11:0] alu_operand_1;
+   reg [11:0] alu_operand_2;
+   reg alu_op;
+   wire [11:0] alu_result;
+
    sevenseg U1(num, a,b,c,d,e,f,g);
    debounce U2(clk, en, en_edge);
+   alu U3(clk, alu_operand_1, alu_operand_2, alu_op, alu_result);
 
    initial begin
        pc <= 0;
@@ -77,6 +83,13 @@ module main(
            if (state == 2) begin
                 case (ir)
                     4'd0: running <= 0; // HLT
+                    4'd1: begin // ADD
+                        // read in operand 2
+                       addr_bus <= ar; 
+                       
+                       we <= 0;
+                       re <= 1; 
+                    end
                     4'd3: begin // STA
                        addr_bus <= ar; // Write to address in address register
                        data_write_bus <= ac; // Put accumulator on data bus
@@ -94,6 +107,12 @@ module main(
 
            if (state == 3) begin
                 case (ir)
+                    4'd1: begin // ADD
+                       alu_operand_1 <= ac; 
+                       alu_operand_2 <= data_read_bus;
+                       alu_op <= 0;
+                       re <= 0; 
+                    end
                     4'd3: begin // STA
                         we <= 0; // disable writes
                     end
@@ -103,8 +122,15 @@ module main(
                     end
                 endcase
            end
+           if (state == 4) begin
+                case (ir)
+                    4'd1: begin // ADD
+                       ac <= alu_result; // store result of addition
+                    end
+                endcase
+           end
 
-            state <= (state >= 3) ? 0 : state + 1;
+            state <= (state >= 4) ? 0 : state + 1;
         
       end 
     end
