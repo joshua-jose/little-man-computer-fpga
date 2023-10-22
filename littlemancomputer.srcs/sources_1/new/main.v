@@ -3,7 +3,8 @@
 // Contains the core logic for the CPU (Control Unit)
 module main(
     input clk, en,
-    output a,b,c,d,e,f,g
+    output a,b,c,d,e,f,g,
+    output [7:0] an
     );
 
    reg [7:0] pc; // program counter
@@ -20,7 +21,6 @@ module main(
 
    ram ram1(clk, addr_bus, data_read_bus, data_write_bus, we, re);
     
-   wire [3:0] num;
    wire en_edge;
 
    reg [11:0] alu_operand_1;
@@ -28,7 +28,17 @@ module main(
    reg alu_op;
    wire [11:0] alu_result;
 
-   sevenseg U1(num, a,b,c,d,e,f,g);
+   reg [3:0] dig7, dig6, dig5, dig4, dig3, dig2, dig1, dig0;
+   wire led_clk;
+   wire rst = 0;
+
+   seginterface U1(clk, rst, 
+    dig7, dig6, dig5, dig4, dig3, dig2, dig1, dig0,
+    
+    led_clk,
+    a,b,c,d,e,f,g,
+    an
+   );
    debounce U2(clk, en, en_edge);
    alu U3(clk, alu_operand_1, alu_operand_2, alu_op, alu_result);
 
@@ -47,8 +57,8 @@ module main(
     reg running;
     initial running <= 1;
     
-    always @(posedge clk) begin
-//       if (en_edge & running) begin
+    always @(posedge led_clk) begin
+    //   if (en_edge & running) begin
         if (running) begin
             // fetch
            if (state == 0) begin
@@ -109,6 +119,9 @@ module main(
                        we <= 0;
                        re <= 1; 
                     end
+                    4'd6: begin // BRA
+                       pc <= ar; // Load the PC with the address to jump to
+                    end
                 endcase
            end
 
@@ -147,10 +160,16 @@ module main(
            end
 
             state <= (state >= 4) ? 0 : state + 1;
-        
+
+            dig0 <= ac[3:0];
+            dig1 <= ac[7:4];
+            dig2 <= ac[11:8];
+
+            dig4 <= state[3:0];
+
+            dig6 <= pc[3:0];
+            dig7 <= pc[7:4];
       end 
     end
-
-   assign num = ar[3:0];
     
 endmodule

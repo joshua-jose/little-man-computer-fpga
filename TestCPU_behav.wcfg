@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="246.801 ns"></ZoomEndTime>
-      <Cursor1Time time="130.200 ns"></Cursor1Time>
+      <ZoomStartTime time="109.470 ns"></ZoomStartTime>
+      <ZoomEndTime time="235.171 ns"></ZoomEndTime>
+      <Cursor1Time time="163.950 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="119"></NameColumnWidth>
       <ValueColumnWidth column_width="183"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="16" />
+   <WVObjectSize size="17" />
    <wvobject fp_name="/TestCPU/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -83,5 +83,9 @@
    <wvobject fp_name="/TestCPU/M1/U3/result" type="array">
       <obj_property name="ElementShortName">result[11:0]</obj_property>
       <obj_property name="ObjectShortName">result[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TestCPU/M1/U3/op" type="logic">
+      <obj_property name="ElementShortName">op</obj_property>
+      <obj_property name="ObjectShortName">op</obj_property>
    </wvobject>
 </wave_config>
