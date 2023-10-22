@@ -11,21 +11,14 @@ module alu
     );
 
     wire carry0, carry1, carry2, carry3;
-    wire [11:0] sum;
-    reg [11:0] result_cache;
 
-    assign carry0 = 0;
+    // when subtracting the extra carry turns 9s complement into 10s complement
+    assign carry0 = op; 
 
-    bcd_adder A1(operand_1[3:0], operand_2[3:0], carry0, sum[3:0], carry1);
-    bcd_adder A2(operand_1[7:4], operand_2[7:4], carry1, sum[7:4], carry2);
-    bcd_adder A3(operand_1[11:8], operand_2[11:8], carry2, sum[11:8], carry3);
+    bcd_adder A1(operand_1[3:0], operand_2[3:0], carry0, op, result[3:0], carry1);
+    bcd_adder A2(operand_1[7:4], operand_2[7:4], carry1, op, result[7:4], carry2);
+    bcd_adder A3(operand_1[11:8], operand_2[11:8], carry2, op, result[11:8], carry3);
 
-    always @(negedge clk) begin
-        if (op == 0)
-            result_cache <= sum;
-    end
-
-    assign result = result_cache;
 
 
 endmodule
@@ -34,6 +27,7 @@ endmodule
 module bcd_adder(
     input [3:0] a,b,
     input carry_in,
+    input op,
     output [3:0] sum,
     output carry
     );
@@ -42,7 +36,10 @@ module bcd_adder(
     
     always @(a,b,carry_in)
     begin
-        sum_temp = a+b+carry_in; //add all the inputs
+        if (op == 0) // add
+            sum_temp = a+b+carry_in; //add all the inputs
+        else
+            sum_temp = a + (9-b) + carry_in; // add the 10's complement
         if(sum_temp > 9) begin
             sum_temp = sum_temp+6; //add 6, if result is more than 9.
             carry_temp = 1;  //set the carry output

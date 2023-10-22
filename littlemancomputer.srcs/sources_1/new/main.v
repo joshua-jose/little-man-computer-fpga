@@ -90,6 +90,13 @@ module main(
                        we <= 0;
                        re <= 1; 
                     end
+                    4'd2: begin // SUB
+                        // read in operand 2
+                       addr_bus <= ar; 
+                       
+                       we <= 0;
+                       re <= 1; 
+                    end
                     4'd3: begin // STA
                        addr_bus <= ar; // Write to address in address register
                        data_write_bus <= ac; // Put accumulator on data bus
@@ -113,6 +120,12 @@ module main(
                        alu_op <= 0;
                        re <= 0; 
                     end
+                    4'd2: begin // SUB
+                       alu_operand_1 <= ac; 
+                       alu_operand_2 <= data_read_bus;
+                       alu_op <= 1;
+                       re <= 0; 
+                    end
                     4'd3: begin // STA
                         we <= 0; // disable writes
                     end
@@ -126,6 +139,9 @@ module main(
                 case (ir)
                     4'd1: begin // ADD
                        ac <= alu_result; // store result of addition
+                    end
+                    4'd2: begin // SUB
+                       ac <= alu_result; // store result of subtraction
                     end
                 endcase
            end

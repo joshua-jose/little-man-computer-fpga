@@ -17,10 +17,7 @@ module ram
     reg [11:0] cache;
     reg [11:0] data [SIZE:0];
 
-    initial begin
-        $readmemh("ram_init.mem", data); // load RAM initial state
-
-    end
+    initial $readmemh("ram_init.mem", data); // load RAM initial state
 
     // 4 MSBs multplied by 10, 4 LSBs then added to that value
     // conversion of BCD to binary
