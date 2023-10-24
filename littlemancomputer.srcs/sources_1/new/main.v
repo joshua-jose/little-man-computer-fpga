@@ -4,7 +4,8 @@
 module main(
     input clk, en,
     output a,b,c,d,e,f,g,
-    output [7:0] an
+    output [7:0] an,
+    output [15:0] led
     );
 
    reg [7:0] pc; // program counter
@@ -18,6 +19,8 @@ module main(
 
    reg we; // ram write enable
    reg re; // ram read enable
+
+   reg [11:0] io_buf; // io buffer for INP/OUT/OTC
 
    ram ram1(clk, addr_bus, data_read_bus, data_write_bus, we, re);
     
@@ -122,6 +125,22 @@ module main(
                     4'd6: begin // BRA
                        pc <= ar; // Load the PC with the address to jump to
                     end
+                    4'd7: begin // BRZ
+                       if (ac == 0)
+                        pc <= ar; // Load the PC with the address to jump to
+                    end
+
+                    4'd9: begin // INP/OUT/OTC
+                    //    if (ar == 1) // INP
+                    //    ;
+                       if (ar == 2) begin // OUT
+                        dig0 <= ac[3:0];
+                        dig1 <= ac[7:4];
+                        dig2 <= ac[11:8];
+                       end
+                       if (ar == 22) // OTC
+                        io_buf <= ac;
+                    end
                 endcase
            end
 
@@ -161,15 +180,21 @@ module main(
 
             state <= (state >= 4) ? 0 : state + 1;
 
-            dig0 <= ac[3:0];
-            dig1 <= ac[7:4];
-            dig2 <= ac[11:8];
+            // dig0 <= ac[3:0];
+            // dig1 <= ac[7:4];
+            // dig2 <= ac[11:8];
 
-            dig4 <= state[3:0];
+            // dig4 <= state[3:0];
 
             dig6 <= pc[3:0];
             dig7 <= pc[7:4];
       end 
     end
+
+    assign led[15] = (state == 0);
+    assign led[14] = (state == 1);
+    assign led[13] = (state == 2);
+    assign led[12] = (state == 3);
+    assign led[11] = (state == 4);
     
 endmodule
